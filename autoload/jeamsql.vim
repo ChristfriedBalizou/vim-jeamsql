@@ -76,6 +76,7 @@ function! jeamsql#JeamSQL()
         bo new
         silent! set buftype=nofile
         let g:running_buffer = bufnr("%")
+        :set wrap!
     endif
 
     " Create config file

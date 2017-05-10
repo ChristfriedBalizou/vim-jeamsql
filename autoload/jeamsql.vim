@@ -1,3 +1,33 @@
+let g:jeamsqlinitfile = ".jeamsql.ini"
+
+function! jeamsql#GetConnectionString()
+    " Load database credential and configuration
+    
+    let delimiter = ";jms;"
+    let str = "" 
+
+    " Get connection string
+    if exists("g:jeamsql_connection")
+        return split(g:jeamsql_connection, delimiter)
+    endif
+
+    return []
+
+endfunction 
+
+
+function! jeamsql#CreateConfigFile()
+
+    let config = jeamsql#GetConnectionString()
+
+    if len(config) > 0
+        
+        silent! delete(g:jeamsqlinitfile)
+        call writefile(config, g:jeamsqlinitfile)
+    endif
+
+endfunction
+
 " Look for sql query
 function! jeamsql#GetQuery() 
 
@@ -48,7 +78,21 @@ function! jeamsql#JeamSQL()
         let g:running_buffer = bufnr("%")
     endif
 
-    let command = '%! echo Hello Word ' .g:sqlquery 
-    exec command	
+    " Create config file
+    call jeamsql#CreateConfigFile()
+
+
+    if !exists("g:jeamsql_config")
+        echom "No config setted. Nothing to do."
+        return 0
+    endif
+
+
+    " Execute command
+    let g:jeams = "python ~/.vim/bundle/vim-jeamsql/python-jeamsql.git/app.py"
+    exec '%!'.g:jeams.' -q "'.g:sqlquery.'" -d '.g:jeamsql_config.' -c "'.g:jeamsqlinitfile.'"'
+
+    " Delete config file
+    silent! delete(g:jeamsqlinitfile)
 
 endfunction
